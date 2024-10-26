@@ -1,7 +1,6 @@
 # Плот
 
-[<kbd>binary search</kbd>](https://coderun.yandex.ru/catalog?tag=binary%20search)
-[<kbd>coderun</kbd>](https://coderun.yandex.ru/selections/eserajim/problems/k-segments)
+[<kbd>algorithm</kbd>](https://contest.yandex.ru/contest/66792/problems/A/)
 
 НиПосередине озера плавает плот, имеющий форму прямоугольника. Стороны плота направлены вдоль параллелей и меридианов. Введём систему координат, в которой ось OX направлена на восток, а ось ОY – на север. Пусть юго-западный угол плота имеет координаты $( x_1​, y_1​ )$, северо-восточный угол – координаты $( x_2​ , y_2​ )$.
 
