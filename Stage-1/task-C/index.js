@@ -8,7 +8,7 @@ function getLetter(n, table) {
 
     const weights = {
         "#": 1,
-        ".": 0
+        ".": 0,
     };
     const edges = []; //top, left, bottom, right
 
@@ -18,16 +18,38 @@ function getLetter(n, table) {
             edges[1] = edges[3] = j;
             return;
         }
-
         edges[0] = Math.min(edges[0], i);
         edges[1] = Math.min(edges[1], j);
         edges[2] = Math.max(edges[2], i);
         edges[3] = Math.max(edges[3], j);
     };
 
-    function getSum(i_1, j_1, i_2, j_2) {
-        return leds[i_2][j_2] - leds[i_1 - 1][j_2] - leds[i_2][j_1 - 1] + leds[i_1 - 1][j_1 - 1];
-    }
+    const getSum = (I1, J1, I2, J2) => {
+        return leds[I2][J2] - leds[I1 - 1][J2] - leds[I2][J1 - 1] + leds[I1 - 1][J1 - 1];
+    };
+
+    const getNextDotFrom = (atI, atJ) => {
+        let isDots = false;
+        let [top, left, bottomMax, rightMax] = edges;
+        let bottom, right;
+
+        for (let i = atI; i <= bottomMax; ++i) {
+            for (let j = atJ; j <= rightMax; ++j) {
+                if (!isDots && weights[table[i - 1][j - 1]] === 0) {
+                    isDots = true;
+                    top = i;
+                    left = j;
+                }
+
+                if (isDots && getSum(top, left, i, j) === 0) {
+                    bottom = i;
+                    right = j;
+                }
+            }
+        }
+
+        return !isDots ? [top, left, bottom, right] : [];
+    };
 
     for (let i = 0; i <= n; i++) {
         leds[i] = [];
@@ -38,14 +60,41 @@ function getLetter(n, table) {
                     updateEdges(i, j);
                 }
 
-                leds[i][j] = leds[i - 1][j] + leds[i][j - 1] - leds[i - 1][j - 1] + weights[table[i - 1][j - 1]];
+                leds[i][j] =
+                    leds[i - 1][j] +
+                    leds[i][j - 1] -
+                    leds[i - 1][j - 1] +
+                    weights[table[i - 1][j - 1]];
             } else {
                 leds[i][j] = 0;
             }
         }
     }
 
-    console.log(edges);
+    if (edges.length == 0) return "X";
+
+    let [tRect, lRect, bRect, rRect] = edges;
+
+    const getSize = ([top, left, bottom, right]) => (bottom - top) * (right - left);
+    const ledLights = getSum(...edges);
+    const letterSize = getSize(edges);
+
+    if (ledLights === letterSize) {
+        return "I";
+    } else {
+        const dotFirst = getNextDotFrom(tRect, lRect);
+        let dotSecond = [];
+        const bFirst = dotFirst[2];
+
+        if (bFirst + 2 <= bRect) {
+            dotSecond = getNextDotFrom(bFirst + 2, lRect);
+        }
+
+        if (dotFirst.length > 0 && dotSecond.length == 0) {
+        }
+    }
+
+    console.log();
 
     return result;
 }
@@ -53,7 +102,7 @@ function getLetter(n, table) {
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin
+    input: process.stdin,
 });
 
 const _inputLines = [];
