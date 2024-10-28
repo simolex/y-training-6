@@ -75,9 +75,9 @@ function getLetter(n, table) {
 
     let [tRect, lRect, bRect, rRect] = edges;
 
-    const getSize = ([top, left, bottom, right]) => (bottom - top) * (right - left);
+    const getSize = (top, left, bottom, right) => (bottom + 1 - top) * (right + 1 - left);
     const ledLights = getSum(...edges);
-    const letterSize = getSize(edges);
+    const letterSize = getSize(...edges);
 
     if (ledLights === letterSize) {
         return "I";
@@ -91,6 +91,26 @@ function getLetter(n, table) {
         }
 
         if (dotFirst.length > 0 && dotSecond.length == 0) {
+            const [top, left, bottom, right] = dotFirst;
+            const dotSize = getSize(top, left, bottom, right);
+
+            if (left > lRect && ledLights + dotSize === letterSize) {
+                if (right == rRect) {
+                    if (top == tRect) {
+                        return "L";
+                    } else if (bottom < bRect) {
+                        return "C";
+                    } else {
+                        return "X";
+                    }
+                } else if (top > tRect && bottom < bRect) {
+                    return "O";
+                } else {
+                    return "X";
+                }
+            } else {
+                return "X";
+            }
         }
     }
 
