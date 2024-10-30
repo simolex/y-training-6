@@ -1,4 +1,4 @@
-const solution = require("./index.2");
+const solution = require(".");
 
 describe("C. Надпись на табло", () => {
     test("test-1", () => {

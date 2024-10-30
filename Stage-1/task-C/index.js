@@ -3,14 +3,12 @@
  */
 
 function getLetter(n, table) {
-    let result;
     const leds = [];
-
+    const edges = []; //top, left, bottom, right
     const weights = {
         "#": 1,
-        ".": 0
+        ".": 0,
     };
-    const edges = []; //top, left, bottom, right
 
     const updateEdges = (i, j) => {
         if (edges.length === 0) {
@@ -28,6 +26,8 @@ function getLetter(n, table) {
         return leds[I2][J2] - leds[I1 - 1][J2] - leds[I2][J1 - 1] + leds[I1 - 1][J1 - 1];
     };
 
+    const getSize = (top, left, bottom, right) => (bottom + 1 - top) * (right + 1 - left);
+
     for (let i = 0; i <= n; i++) {
         leds[i] = [];
         for (let j = 0; j <= n; j++) {
@@ -37,7 +37,11 @@ function getLetter(n, table) {
                     updateEdges(i, j);
                 }
 
-                leds[i][j] = leds[i - 1][j] + leds[i][j - 1] - leds[i - 1][j - 1] + weights[table[i - 1][j - 1]];
+                leds[i][j] =
+                    leds[i - 1][j] +
+                    leds[i][j - 1] -
+                    leds[i - 1][j - 1] +
+                    weights[table[i - 1][j - 1]];
             } else {
                 leds[i][j] = 0;
             }
@@ -51,7 +55,6 @@ function getLetter(n, table) {
 
         for (let i = top; i <= bottomMax; ++i) {
             for (let j = left; j <= rightMax; ++j) {
-                // console.log(isDots, i, j, getSum(i, j, i, j), top, left, bottom, right);
                 if (!isDots && getSum(i, j, i, j) === 0) {
                     isDots = true;
                     top = i;
@@ -64,8 +67,6 @@ function getLetter(n, table) {
                 }
             }
         }
-        // console.log([top, left, bottom, right]);
-
         return isDots ? [top, left, bottom, right] : [];
     };
 
@@ -73,7 +74,6 @@ function getLetter(n, table) {
 
     let [tRect, lRect, bRect, rRect] = edges;
 
-    const getSize = (top, left, bottom, right) => (bottom + 1 - top) * (right + 1 - left);
     const ledLights = getSum(...edges);
     const letterSize = getSize(...edges);
 
@@ -99,16 +99,10 @@ function getLetter(n, table) {
                         return "L";
                     } else if (bottom < bRect) {
                         return "C";
-                    } else {
-                        return "X";
                     }
                 } else if (top > tRect && bottom < bRect) {
                     return "O";
-                } else {
-                    return "X";
                 }
-            } else {
-                return "X";
             }
         } else if (dotFirst.length > 0 && dotSecond.length > 0) {
             const [topFirst, leftFirst, bottomFirst, rightFirst] = dotFirst;
@@ -116,31 +110,32 @@ function getLetter(n, table) {
             const dotSizeFirst = getSize(...dotFirst);
             const dotSizeSecond = getSize(...dotSecond);
 
-            if (leftFirst == leftSecond && ledLights + dotSizeFirst + dotSizeSecond === letterSize) {
+            if (
+                leftFirst == leftSecond &&
+                ledLights + dotSizeFirst + dotSizeSecond === letterSize
+            ) {
                 if (leftFirst > lRect && bottomSecond == bRect && rightFirst < rRect) {
-                    if (rightSecond == rRect && topFirst > tRect && rightFirst < rRect && rightSecond == rRect) {
+                    if (
+                        rightSecond == rRect &&
+                        topFirst > tRect &&
+                        rightFirst < rRect &&
+                        rightSecond == rRect
+                    ) {
                         return "P";
                     } else if (rightSecond < rRect && (topFirst == tRect) & (rightFirst < rRect)) {
                         return "H";
-                    } else {
-                        return "X";
                     }
-                } else {
-                    return "X";
                 }
-            } else {
-                return "X";
             }
         }
     }
-
-    return result;
+    return "X";
 }
 
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin
+    input: process.stdin,
 });
 
 const _inputLines = [];
@@ -165,7 +160,6 @@ function solve() {
     }
 
     const result = getLetter(n, table);
-
     console.log(result);
 }
 
