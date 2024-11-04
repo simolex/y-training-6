@@ -14,9 +14,12 @@ function evidences(n, items, m, k, queries) {
     const responses = new Int32Array(n + 1);
     const prefixBigest = new Int32Array(n + 1);
     for (let i = 1; i < n; i++) {
-        prefixRepeates[i] = prefixRepeates[i - 1] + items[i - 1] === items[i] ? 1 : 0;
-        prefixBigest[i] = prefixBigest[i - 1] + items[i - 1] > items[i] ? 1 : 0;
+        prefixRepeates[i + 1] = prefixRepeates[i] + (items[i - 1] === items[i] ? 1 : 0);
+        prefixBigest[i + 1] = prefixBigest[i] + (items[i - 1] > items[i] ? 1 : 0);
     }
+
+    console.log(prefixRepeates);
+    console.log(prefixBigest);
     let first = 1;
     let repeats = 0;
     let bigest = false;
