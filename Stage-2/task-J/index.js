@@ -1,48 +1,35 @@
 /**
- * Префиксные суммы
+ * Исследование улик*
  */
 
-Array.prototype.peek = function () {
-    if (this.length === 0) {
-        return;
-    }
-    return this[this.length - 1];
-};
-
 function evidences(n, items, m, k, queries) {
-    const prefixRepeates = new Int32Array(n + 1);
     const responses = new Int32Array(n + 1);
+    const prefixRepeates = new Int32Array(n + 1);
     const prefixBigest = new Int32Array(n + 1);
-    for (let i = 1; i < n; i++) {
-        prefixRepeates[i + 1] = prefixRepeates[i] + (items[i - 1] === items[i] ? 1 : 0);
-        prefixBigest[i + 1] = prefixBigest[i] + (items[i - 1] > items[i] ? 1 : 0);
+    for (let i = 0; i < n - 1; i++) {
+        prefixRepeates[i + 1] = prefixRepeates[i] + (items[i] === items[i + 1] ? 1 : 0);
+        prefixBigest[i + 1] = prefixBigest[i] + (items[i] > items[i + 1] ? 1 : 0);
     }
 
-    console.log(prefixRepeates);
-    console.log(prefixBigest);
     let first = 1;
-    let repeats = 0;
-    let bigest = false;
     responses[1] = 1;
-    for (let i = 0; i < n; i++) {
-        if (repeats > 0 && items[i - 1] === items[i]) {
-            repeats--;
-        }
-
-        while (/*!bigest && */ first < n && repeats < k) {
-            // bigest = items[first] < items[first - 1];
-
-            if (items[first - 1] === items[first]) {
-                repeats++;
+    for (let i = 0; i <= n; i++) {
+        while (
+            first < n &&
+            (prefixRepeates[first] - prefixRepeates[i] < k ||
+                (prefixRepeates[first] - prefixRepeates[i] === k && prefixBigest[first] - prefixBigest[i] === 0))
+        ) {
+            if (prefixBigest[first] - prefixBigest[i] === 0) {
+                responses[first + 1] = i + 1;
+            } else {
+                responses[first + 1] = first + 1;
+                i = first;
             }
-            responses[first + 1] = i + 1;
-            console.log(i, repeats);
             first++;
         }
     }
-    console.log(responses);
 
-    return [];
+    return queries.map((queryIdx) => responses[queryIdx]);
 }
 
 const _readline = require("readline");
