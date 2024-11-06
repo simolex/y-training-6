@@ -27,7 +27,6 @@ function censoredProduct(n, c, s) {
         prefixB[i + 1] = prefixB[i];
     });
 
-    // console.log(prefixA, prefixB);
     let first = 0;
     let cntA = 0;
     let cntB = 0;
@@ -36,7 +35,6 @@ function censoredProduct(n, c, s) {
     for (let left = 0; left < n; left++) {
         while (first < n && cntAll <= c) {
             if (splitedString[first] === "a") {
-                // max = Math.max(max, 1);
                 cntA++;
             }
             if (splitedString[first] === "b") {
