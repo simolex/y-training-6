@@ -1,27 +1,84 @@
-Array.prototype.peek = function () {
-    if (this.length === 0) {
-        return;
+class Queue {
+    constructor() {
+        this.queue = [];
+        this.frontPtr = 0;
     }
-    return this[this.length - 1];
+
+    push_back(n) {
+        this.queue.push(n);
+    }
+
+    pop_front() {
+        if (this.size() > 0) {
+            return this.queue[this.frontPtr++];
+        }
+    }
+
+    peek_front() {
+        if (this.size() > 0) {
+            return this.queue[this.frontPtr];
+        }
+    }
+
+    size() {
+        return this.queue.length - this.frontPtr;
+    }
+}
+
+const getMainRoads = (a, b) => {
+    const decode = { 2: "R_1_2", 6: "R_2_3", 12: "R_3_4", 4: "R_1_4", 3: "R_1_3", 8: "R_2_4" };
+    return decode[a * b];
 };
 
-function failClientsCount(n, b, clients) {
-    const prefix = Array(n + 1);
-    prefix[0] = 0n;
-    const processing = BigInt(b);
+const orderRules = {
+    R_1_2: [[1], [2], [3], [4]],
+    R_2_3: [[2], [3], [4], [1]],
+    R_3_4: [[3], [4], [1], [2]],
+    R_1_4: [[4], [1], [2], [3]],
+    R_1_3: [
+        [1, 3],
+        [2, 4]
+    ],
+    R_2_4: [
+        [2, 4],
+        [1, 3]
+    ]
+};
 
-    let inQueue = 0n;
-    for (let i = 0; i < n; i++) {
-        inQueue += BigInt(clients[i]);
-        if (inQueue <= processing) {
-            inQueue = 0n;
-        } else {
-            inQueue -= processing;
+function automatedStore(n, a, b, rovers) {
+    const result = Array(n);
+
+    const mainCode = getMainRoads(a, b);
+    const rules = orderRules[mainCode];
+    const roads = {
+        1: new Queue(),
+        2: new Queue(),
+        3: new Queue(),
+        4: new Queue()
+    };
+    const indexRoad = Object.keys(roads);
+
+    rovers.forEach((v, i) => v.push(i));
+    rovers.sort((a, b) => a[1] - b[1]);
+    rovers.forEach((r) => roads[r[0]].push_back(r));
+
+    let time = 1;
+    let isBusy = false;
+    let curRover;
+    while (indexRoad.reduce((sum, idxQ) => sum + roads[idxQ].size(), 0) > 0) {
+        for (let rule = 0; rule < rules.length && !isBusy; rule++) {
+            for (let i = 0; i < rules[rule].length; i++) {
+                if ((curRover = roads[rules[rule][i]].peek_front()) && curRover[1] <= time) {
+                    isBusy = true;
+                    roads[rules[rule][i]].pop_front();
+                    result[curRover[2]] = time;
+                }
+            }
         }
-        prefix[i + 1] = prefix[i] + BigInt(clients[i]) + inQueue;
+        isBusy = false;
+        time++;
     }
-
-    return prefix[n].toString();
+    return result;
 }
 
 const _readline = require("readline");
@@ -40,12 +97,17 @@ _reader.on("line", (line) => {
 process.stdin.on("end", solve);
 
 function solve() {
-    const [n, b] = readArray();
-    const clients = readArray();
+    const n = readInt();
+    const [a, b] = readArray();
 
-    const result = failClientsCount(n, b, clients);
+    const rovers = [];
+    for (let i = 0; i < n; i++) {
+        rovers.push(readArray());
+    }
 
-    console.log(result);
+    const result = automatedStore(n, a, b, rovers);
+
+    console.log(result.join("\n"));
 }
 
 function readAllString() {
@@ -107,4 +169,4 @@ function readEdges(n) {
     return grid;
 }
 
-module.exports = failClientsCount;
+module.exports = automatedStore;
