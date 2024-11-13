@@ -70,26 +70,46 @@ class Deque {
         this.limit = 2;
     }
 }
-function chairsBed(n, H, heights, widths) {
-    const minRange = [];
+function chairsBed(n, H, heightAndWidth) {
+    const needWidth = H;
+    let minDelta = Infinity;
+    let currentWidth = 0;
     const deque = new Deque();
 
+    heightAndWidth.sort((a, b) => a[0] - b[0]);
+
+    let j = 0;
+    let prevChair = 0;
+    let delta;
     for (let i = 0; i < n; i++) {
-        if (i >= k && deque.peek_front() === nums[i - k]) {
+        if (heightAndWidth[i][1] >= needWidth) {
+            return 0;
+        }
+        while (j < n && currentWidth < needWidth) {
+            if (j > prevChair) {
+                prevChair++;
+                delta = heightAndWidth[j][0] - heightAndWidth[j - 1][0];
+
+                while (deque.size() > 0 && deque.peek_back() < delta) {
+                    deque.pop_back();
+                }
+                deque.push_back(delta);
+            }
+            currentWidth += heightAndWidth[j][1];
+            j++;
+        }
+
+        if (currentWidth >= needWidth) {
+            minDelta = Math.min(minDelta, deque.peek_front());
+        }
+
+        currentWidth -= heightAndWidth[i][1];
+        if (i < n - 1 && deque.size() > 0 && deque.peek_front() === heightAndWidth[i + 1][0] - heightAndWidth[i][0]) {
             deque.pop_front();
-        }
-
-        while (deque.size() > 0 && deque.peek_back() > nums[i]) {
-            deque.pop_back();
-        }
-        deque.push_back(nums[i]);
-
-        if (i >= k - 1) {
-            minRange.push(deque.peek_front());
         }
     }
 
-    return minRange;
+    return minDelta;
 }
 
 const _readline = require("readline");
@@ -109,10 +129,10 @@ process.stdin.on("end", solve);
 
 function solve() {
     const [n, H] = readArray();
-    const heights = readArray();
-    const widths = readArray();
+    const heightAndWidth = readArray2D();
+    readArray().forEach((v, i) => heightAndWidth[i].push(v));
 
-    const result = chairsBed(n, H, heights, widths);
+    const result = chairsBed(n, H, heightAndWidth);
     console.log(result);
 }
 
@@ -149,31 +169,14 @@ function readArray() {
     return arr;
 }
 
-function readBigIntArray() {
+function readArray2D() {
     var arr = _inputLines[_curLine]
         .trim(" ")
         .split(" ")
-        .map((num) => BigInt(num));
+        .filter((str) => str && str.length > 0)
+        .map((num) => [Number(num)]);
     _curLine++;
     return arr;
-}
-
-function readStringArray() {
-    var arr = _inputLines[_curLine]
-        .trim(" ")
-        .split(" ")
-        .filter((str) => str && str.length > 0);
-    _curLine++;
-    return arr;
-}
-
-function readEdges(n) {
-    let grid = [];
-    for (let i = 0; i < n; i++) {
-        let vertex = readArray();
-        grid.push(vertex);
-    }
-    return grid;
 }
 
 module.exports = chairsBed;
