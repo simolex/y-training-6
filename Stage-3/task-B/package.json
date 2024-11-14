@@ -1,6 +1,6 @@
 {
-    "name": "ya-training-5",
-    "version": "1.0.0",
+    "name": "task",
+    "version": "0.0.1",
     "main": "index.js",
     "author": "simolex",
     "license": "MIT",
