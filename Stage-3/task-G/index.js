@@ -1,3 +1,7 @@
+/**
+ * Очередь в ПВЗ*
+ */
+
 Array.prototype.peek = function () {
     if (this.length === 0) {
         return;

@@ -1,24 +1,12 @@
 const solution = require(".");
 
-describe("18. Значение арифметического выражения", () => {
+describe("Очередь в ПВЗ*", () => {
     test("test-1", () => {
-        const result = solution("1+(2*2 - 3)");
-        expect(result).toBe(2);
+        const result = solution(3, 4, [1, 5, 9]);
+        expect(result).toBe("22");
     });
     test("test-2", () => {
-        const result = solution("1+a+1");
-        expect(result).toBeUndefined();
-    });
-    test("test-3", () => {
-        const result = solution("1 1 + 2");
-        expect(result).toBeUndefined();
-    });
-    test("test-5", () => {
-        const result = solution("1+2-3+4-5+6-7+8-9+10-11+12-13");
-        expect(result).toBe(-5);
-    });
-    test("test-21+++", () => {
-        const result = solution("((1 (3 + 5)) -)");
-        expect(result).toBeUndefined();
+        const result = solution(3, 0, [4, 4, 4]);
+        expect(result).toBe("36");
     });
 });

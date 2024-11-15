@@ -1,6 +1,6 @@
 const solution = require(".");
 
-describe("18. Значение арифметического выражения", () => {
+describe("Значение арифметического выражения", () => {
     test("test-1", () => {
         const result = solution("1+(2*2 - 3)");
         expect(result).toBe(2);
