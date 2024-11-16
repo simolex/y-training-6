@@ -1,3 +1,6 @@
+/**
+ * Кровать из стульев*
+ */
 class Deque {
     deque = [];
     constructor() {

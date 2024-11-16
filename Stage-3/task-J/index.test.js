@@ -1,24 +1,23 @@
 const solution = require(".");
 
-describe("18. Значение арифметического выражения", () => {
+describe("Кровать из стульев*", () => {
     test("test-1", () => {
-        const result = solution("1+(2*2 - 3)");
+        const result = solution(4, 7, [
+            [1, 1],
+            [4, 4],
+            [1, 2],
+            [2, 3]
+        ]);
         expect(result).toBe(2);
     });
     test("test-2", () => {
-        const result = solution("1+a+1");
-        expect(result).toBeUndefined();
-    });
-    test("test-3", () => {
-        const result = solution("1 1 + 2");
-        expect(result).toBeUndefined();
-    });
-    test("test-5", () => {
-        const result = solution("1+2-3+4-5+6-7+8-9+10-11+12-13");
-        expect(result).toBe(-5);
-    });
-    test("test-21+++", () => {
-        const result = solution("((1 (3 + 5)) -)");
-        expect(result).toBeUndefined();
+        const result = solution(5, 6, [
+            [1, 5],
+            [3, 4],
+            [5, 3],
+            [4, 2],
+            [2, 1]
+        ]);
+        expect(result).toBe(1);
     });
 });

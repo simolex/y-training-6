@@ -1,3 +1,6 @@
+/**
+ * Стек с суммой*
+ */
 class Stack {
     constructor() {
         this.stack = [];

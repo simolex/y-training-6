@@ -1,3 +1,7 @@
+/**
+ * Автоматизированный склад*
+ */
+
 class Queue {
     constructor() {
         this.queue = [];
