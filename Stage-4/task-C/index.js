@@ -5,16 +5,37 @@
 function pedigreeLCA(n, kins, queries) {
     const nameTopParent = new Set();
     const nameAllChild = new Set();
+
+    const parents = new Map();
     const kinMap = new Map();
     const kinRange = new Map();
     const stack = [];
 
-    const count = Array(n + 1).fill(-1);
-    const parents = new Int32Array(n + 1);
+    const getCommonParent = (child_1, child_2) => {
+        let height_1 = kinRange.get(child_1).level;
+        let height_2 = kinRange.get(child_2).level;
+
+        while (height_1 !== height_2) {
+            if (height_1 > height_2) {
+                child_1 = parents.get(child_1);
+                height_1--;
+            } else {
+                child_2 = parents.get(child_2);
+                height_2--;
+            }
+        }
+        while (child_1 !== child_2) {
+            child_1 = parents.get(child_1);
+            child_2 = parents.get(child_2);
+        }
+        return child_1;
+    };
 
     let child, parent;
     kins.forEach((kin) => {
         [child, parent] = kin;
+
+        parents.set(child, parent);
 
         if (!kinMap.has(parent)) {
             kinMap.set(parent, []);
@@ -30,63 +51,37 @@ function pedigreeLCA(n, kins, queries) {
     }
     nameAllChild.clear();
 
-    // console.log(kinMap, nameTopParent);
-
-    let times = 0;
-    stack.push(nameTopParent.values().next().value);
-    console.log(kinMap);
+    // let times = 0;
+    stack.push([nameTopParent.values().next().value, 0]);
     while (stack.length > 0) {
-        const current = stack.pop();
+        const [current, level] = stack.pop();
 
         if (!kinRange.has(current)) {
-            times++;
+            // times++;
 
-            kinRange.set(current, { in: times });
-            stack.push(current);
+            kinRange.set(current, { /*in: times,*/ level });
+            stack.push([current, level]);
 
             if (kinMap.has(current)) {
-                kinMap.get(current).forEach((next) => stack.push(next));
+                kinMap.get(current).forEach((next) => stack.push([next, level + 1]));
             } else {
-                kinRange.get(current)["out"] = times;
+                // kinRange.get(current)["out"] = times;
             }
         } else {
-            kinRange.get(current)["out"] = times;
+            // kinRange.get(current)["out"] = times;
         }
     }
 
-    console.log(kinRange);
+    // console.log(kinRange);
+    const result = queries.map(([c1, c2]) => getCommonParent(c1, c2));
 
-    // stack[pntStack++] = 1;
-    // while (pntStack > 0) {
-    //     const current = stack[--pntStack];
-    //     if (vizited[current] > 0) {
-    //         vizited[current] = 2;
-    //         if (current - 2 >= 0 && bosses[current - 2]) {
-    //             count[bosses[current - 2]] += count[current];
-    //             result[bosses[current - 2]] += result[current] + count[current];
-    //         }
-    //     } else {
-    //         vizited[current] = 1;
-
-    //         if (bossMap.has(current)) {
-    //             stack[pntStack++] = current;
-    //             // stack.push(current);
-    //             // bossMap.get(current).sort((a, b) => b - a);
-    //             bossMap.get(current).forEach((v) => (stack[pntStack++] = v));
-    //             // stack.push(...bossMap.get(current));
-    //         } else {
-    //             count[bosses[current - 2]] += 1;
-    //             result[bosses[current - 2]] += 2;
-    //         }
-    //     }
-    // }
-    return count;
+    return result;
 }
 
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin
+    input: process.stdin,
 });
 
 const _inputLines = [];
