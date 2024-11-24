@@ -5,6 +5,7 @@
 function sizeSubTree(n, edges, weights) {
     const sum = Array(n + 1).fill(-1);
     const selected = new Int8Array(n + 1);
+    const depth = new Int8Array(n + 1);
     const parents = new Int32Array(n + 1);
     const edgeMap = new Map();
     const stack = [];
@@ -39,13 +40,14 @@ function sizeSubTree(n, edges, weights) {
                 }
             });
         } else {
-            console.log("v", current);
+            // console.log("v", current);
             prevParent = parents[current];
             sum[prevParent] += weights[current - 1];
 
             parentValue = prevParent > 0 ? weights[prevParent - 1] : 0;
+            depth[prevParent] = Math.max(depth[prevParent], depth[current] !== 3 ? depth[current] + 1 : 3);
 
-            if (selected[current] === 0 && edgeMap.get(current).length > 1) {
+            if (selected[current] === 0 && depth[current] > 0) {
                 console.log(
                     "if",
                     current,
@@ -57,16 +59,41 @@ function sizeSubTree(n, edges, weights) {
                 );
                 if (parentValue + sum[current] > parentValue + weights[current - 1]) {
                     selected[current] = 1;
+                    depth[prevParent] = 1;
                 } else {
                     selected[prevParent] = 1;
+                    depth[prevParent] = 0;
+
                     edgeMap.get(current).forEach((next) => {
                         if (next !== prevParent) {
                             selected[next] = 1;
                         }
                     });
                 }
+            } else if (depth[current] > 0 && depth[current] < 2 && selected[current] === 1) {
+                childSum =
+                    edgeMap.get(current).reduce((s, next) => (next !== prevParent ? s + sum[next] : s), 0) +
+                    weights[current - 1];
 
-                console.log(selected);
+                if (sum[current] < childSum) {
+                    selected[current] = 0;
+                    edgeMap.get(current).forEach((next) => {
+                        if (next !== prevParent) {
+                            selected[next] = 1;
+                        }
+                    });
+                    edgeMap.get(current).forEach((next) => {
+                        if (next !== prevParent) {
+                            edgeMap.get(next).forEach((next2) => {
+                                if (next2 !== next) {
+                                    selected[next2] = 0;
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // console.log(selected);
             }
         }
     }
