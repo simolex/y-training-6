@@ -3,7 +3,10 @@
  */
 
 function sizeSubTree(n, edges, weights) {
-    const sum = Array(n + 1).fill(-1);
+    const sum = Array(n + 1)
+        .fill()
+        .map(() => Array(2).fill(-1).fill(0, 1));
+
     const selected = new Int8Array(n + 1);
     const depth = new Int8Array(n + 1);
     const parents = new Int32Array(n + 1);
@@ -24,81 +27,66 @@ function sizeSubTree(n, edges, weights) {
         edgeMap.get(v2).push(v1);
     });
 
-    let nextParent, parentValue;
+    let parent;
     stack.push(1);
     while (stack.length > 0) {
         const current = stack.pop();
 
-        if (sum[current] < 0) {
-            sum[current] = 0;
+        if (sum[current][0] < 0) {
+            sum[current][0] = 0;
             stack.push(current);
 
             edgeMap.get(current).forEach((next) => {
-                if (sum[next] === -1) {
+                if (sum[next][0] === -1) {
                     stack.push(next);
                     parents[next] = current;
                 }
             });
         } else {
-            // console.log("v", current);
-            prevParent = parents[current];
-            sum[prevParent] += weights[current - 1];
+            parent = parents[current];
 
-            parentValue = prevParent > 0 ? weights[prevParent - 1] : 0;
-            depth[prevParent] = Math.max(depth[prevParent], depth[current] !== 3 ? depth[current] + 1 : 3);
+            sum[current][1] += weights[current - 1];
 
-            if (selected[current] === 0 && depth[current] > 0) {
-                console.log(
-                    "if",
-                    current,
-                    prevParent,
-                    parentValue,
-                    parentValue + sum[current],
-                    parentValue + weights[current - 1],
-                    parentValue + sum[current] > parentValue + weights[current - 1]
-                );
-                if (parentValue + sum[current] > parentValue + weights[current - 1]) {
-                    selected[current] = 1;
-                    depth[prevParent] = 1;
-                } else {
-                    selected[prevParent] = 1;
-                    depth[prevParent] = 0;
-
-                    edgeMap.get(current).forEach((next) => {
-                        if (next !== prevParent) {
-                            selected[next] = 1;
+            if (current > 1) {
+                for (let i = 0; i < 2; i++) {
+                    if (i == 1) {
+                        if (sum[current][0] > sum[current][1]) {
+                            selected[current] = 1;
+                            sum[parent][1] += sum[current][1];
+                        } else {
+                            sum[parent][1] += sum[current][0];
                         }
-                    });
+                    } else {
+                        sum[parent][0] += sum[current][1];
+                    }
                 }
-            } else if (depth[current] > 0 && depth[current] < 2 && selected[current] === 1) {
-                childSum =
-                    edgeMap.get(current).reduce((s, next) => (next !== prevParent ? s + sum[next] : s), 0) +
-                    weights[current - 1];
-
-                if (sum[current] < childSum) {
-                    selected[current] = 0;
-                    edgeMap.get(current).forEach((next) => {
-                        if (next !== prevParent) {
-                            selected[next] = 1;
-                        }
-                    });
-                    edgeMap.get(current).forEach((next) => {
-                        if (next !== prevParent) {
-                            edgeMap.get(next).forEach((next2) => {
-                                if (next2 !== next) {
-                                    selected[next2] = 0;
-                                }
-                            });
-                        }
-                    });
-                }
-
-                // console.log(selected);
             }
         }
     }
-    let minSum = 0;
+    let minSum = Math.min(sum[1][1], sum[1][0]);
 
+    stack.push([1, minSum]);
+    while (stack.length > 0) {
+        let [current, min] = stack.pop();
+
+        if (sum[current][1] == min) {
+            min -= weights[current - 1];
+            selected[current] = 1;
+            edgeMap.get(current).forEach((next) => {
+                if (current === parents[next]) {
+                    stack.push([next, sum[next][selected[next]]]);
+                }
+            });
+        } else {
+            edgeMap.get(current).forEach((next) => {
+                if (current === parents[next]) {
+                    stack.push([next, sum[next][1]]);
+                }
+            });
+        }
+    }
+
+    minSum = 0;
     const result = weights
         .map((w, idx) => {
             if (selected[idx + 1] > 0) minSum += weights[idx];
@@ -116,7 +104,7 @@ function sizeSubTree(n, edges, weights) {
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin
+    input: process.stdin,
 });
 
 const _inputLines = [];
