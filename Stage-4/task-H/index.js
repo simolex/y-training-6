@@ -8,7 +8,6 @@ function sizeSubTree(n, edges, weights) {
         .map(() => Array(2).fill(-1).fill(0, 1));
 
     const selected = new Int8Array(n + 1);
-    const depth = new Int8Array(n + 1);
     const parents = new Int32Array(n + 1);
     const edgeMap = new Map();
     const stack = [];
@@ -104,7 +103,7 @@ function sizeSubTree(n, edges, weights) {
 const _readline = require("readline");
 
 const _reader = _readline.createInterface({
-    input: process.stdin,
+    input: process.stdin
 });
 
 const _inputLines = [];
