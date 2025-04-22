@@ -27,6 +27,8 @@ function main() {
         }
     }
 
+    console.log(cnk);
+
     // Итеративная версия DFS с использованием стека (исправленная)
     function iterativeDfs(startNode) {
         const stack = [];
