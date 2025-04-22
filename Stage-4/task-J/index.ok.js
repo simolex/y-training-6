@@ -1,33 +1,26 @@
 const MOD = 10n ** 9n + 7n;
+const smMOD = 10 ** 9 + 7;
 
 function main() {
     // Тестовые входные данные
     const fs = require("fs");
     const input = fs.readFileSync(0, "utf-8").trim().split("\n");
     const n = parseInt(input[0]);
-    const edges = [];
+
+    const graph = Array.from({ length: n + 1 }, () => []);
     for (let i = 1; i < n; i++) {
         const [u, v] = input[i].split(" ").map(Number);
-        edges.push([u, v]);
-    }
-
-    // Построение графа
-    const graph = Array.from({ length: n + 1 }, () => []);
-    for (const [u, v] of edges) {
         graph[u].push({ node: v, dir: 0 }); // Прямое направление
         graph[v].push({ node: u, dir: 1 }); // Обратное направление
     }
 
-    // Предварительный расчёт комбинаторики
-    const cnk = Array.from({ length: n + 1 }, () => new Array(n + 1).fill(0n));
+    const cnk = Array.from({ length: n + 1 }, (_, i) => new Int32Array(i + 2).fill(0));
     for (let i = 0; i <= n; i++) {
-        cnk[i][0] = 1n;
+        cnk[i][0] = 1;
         for (let j = 1; j <= i; j++) {
-            cnk[i][j] = (cnk[i - 1][j - 1] + cnk[i - 1][j]) % MOD;
+            cnk[i][j] = (cnk[i - 1][j - 1] + cnk[i - 1][j]) % smMOD;
         }
     }
-
-    console.log(cnk);
 
     // Итеративная версия DFS с использованием стека (исправленная)
     function iterativeDfs(startNode) {
@@ -68,35 +61,69 @@ function main() {
             }
 
             stack.push({ node, parent, processed: true });
-            const children = childrenMap.get(node) || [];
 
             // Добавляем детей в обратном порядке для правильной обработки
-            for (let i = children.length - 1; i >= 0; i--) {
-                const { node: child } = children[i];
-                stack.push({ node: child, parent: node, processed: false });
-            }
+            stack.push(
+                ...(childrenMap.get(node) || [])
+                    .map(({ node: child }) => ({
+                        node: child,
+                        parent: node,
+                        processed: false,
+                    }))
+                    .reverse()
+            );
         }
 
         // Обработка в пост-порядке
+
+        // let newDp;
+        const buffer = Array(2);
+        const lengthBuffer = Array(2);
+        buffer[0] = [];
+        buffer[1] = new Array(1).fill(0n);
+        lengthBuffer[0] = 0;
+        lengthBuffer[1] = 1;
+
+        let prefixSum = [0n];
+
         for (const node of postOrder) {
             const children = childrenMap.get(node) || [];
-            let dp = dpMap.get(node);
+            let idxDp = 0;
+            let idxNewDp = 1;
+            // let dp
+            buffer[idxDp] = dpMap.get(node);
+            lengthBuffer[idxDp] = buffer[idxDp].length;
 
             for (const { node: child, dir } of children) {
                 const childDp = dpMap.get(child);
-                const prefixSum = [0n];
+                if (childDp.length - 1 > prefixSum.length) {
+                    prefixSum = Array(prefixSum.length + childDp.length + 1);
+                }
+                prefixSum[0] = 0n;
+                let index = 1;
                 for (const x of childDp) {
-                    prefixSum.push((prefixSum[prefixSum.length - 1] + x) % MOD);
+                    prefixSum[index] = (prefixSum[index - 1] + x) % MOD;
+                    index++;
                 }
 
-                const newDp = Array(dp.length + childDp.length).fill(0n);
+                const newDpLength = lengthBuffer[idxDp] + childDp.length;
+                if (buffer[idxNewDp].length < newDpLength)
+                    buffer[idxNewDp] = new Array(newDpLength).fill(0n);
+                lengthBuffer[idxNewDp] = newDpLength;
 
-                for (let x1 = 0; x1 < dp.length; x1++) {
+                buffer[idxNewDp].fill(0n);
+
+                for (let x1 = 0; x1 < lengthBuffer[idxDp]; x1++) {
                     for (let cnt = 0; cnt <= childDp.length; cnt++) {
                         const x2 = x1 + cnt;
+
                         let ways =
-                            (cnk[x2][cnt] * cnk[newDp.length - 1 - x2][childDp.length - cnt]) % MOD;
-                        ways = (ways * dp[x1]) % MOD;
+                            (BigInt(cnk[x2][cnt]) *
+                                BigInt(
+                                    cnk[lengthBuffer[idxNewDp] - 1 - x2][childDp.length - cnt]
+                                )) %
+                            MOD;
+                        ways = (ways * buffer[idxDp][x1]) % MOD;
 
                         if (dir === 0) {
                             ways = (ways * prefixSum[cnt]) % MOD;
@@ -107,12 +134,14 @@ function main() {
                                 MOD;
                         }
 
-                        newDp[x2] = (newDp[x2] + ways) % MOD;
+                        buffer[idxNewDp][x2] = (buffer[idxNewDp][x2] + ways) % MOD;
                     }
                 }
-                dp = newDp;
+                // dp = newDp.slice(0, newDpLength);
+                idxDp = 1 - idxDp;
+                idxNewDp = 1 - idxNewDp;
             }
-            dpMap.set(node, dp);
+            dpMap.set(node, buffer[idxDp].slice(0, lengthBuffer[idxDp]));
         }
 
         return dpMap.get(startNode);
